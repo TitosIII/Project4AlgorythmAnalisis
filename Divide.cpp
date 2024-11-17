@@ -1,7 +1,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 
-void rotate(char**, int, int, int);
+void rotate(unsigned char*, int, int, int, int);
 
 int main(){
     FILE* ptr;
@@ -13,19 +13,16 @@ int main(){
         printf("Archivo obtenido.\n");
     }
 
-    char buffer [16];
+    char buffer[16];
+    fgets(buffer, sizeof(buffer), ptr);
+    printf("%s\n", buffer);
+    
 
-    for(char b : buffer){
-        b = fgetc(ptr);
-    }
+    unsigned char R [256][256];
+    unsigned char G [256][256];
+    unsigned char B [256][256];
 
-    printf("%s", buffer);
-
-    char R [256][256];
-    char G [256][256];
-    char B [256][256];
-
-    int i = 0, j = 0;
+    int i, j;
     for(i = 0; i < 256; i++){
         for(j = 0; j < 256; j++){
             R[i][j] = fgetc(ptr);
@@ -37,15 +34,11 @@ int main(){
 
     printf("Archivo procesado.\n");
 
-    rotate((char**)R, 0, 0, 256);
-    rotate((char**)G, 0, 0, 256);
-    rotate((char**)B, 0, 0, 256);
-
     printf("Rotando imagen...\n");
 
     ptr = fopen("imgRotated.ppm", "wb");
     printf("Creando imagen.\n");
-    fprintf(ptr, buffer);
+    fprintf(ptr, "P6 256 256 255\n");
     for(i = 0; i < 256; i++){
         for(j = 0; j < 256; j++){
             fputc(R[i][j], ptr);
@@ -58,7 +51,7 @@ int main(){
     return 1;
 }
 
-void rotate(char** array, int p, int q, int width){
+void rotate(unsigned char* array, int p, int q, int width, int maxWidth){
     if(width == 1){
         return;
     }
@@ -68,21 +61,20 @@ void rotate(char** array, int p, int q, int width){
     char aux1;
     char aux2;
 
-    rotate(array, p, q, size);
-    rotate(array, p, p + size, size);
-    rotate(array, p + size, q, size);
-    rotate(array, p + size, p + size, size);
+    rotate(array, p, q, size, maxWidth);
+    rotate(array, p, q + size, size, maxWidth);
+    rotate(array, p + size, q, size, maxWidth);
+    rotate(array, p + size, q + size, size, maxWidth);
 
     int i,j;
     for(i = p; i < p + size; i++){
         for(j = q; j < q + size; j++){
-            aux1 = array[i][j];
-            aux2 = array[i + size][j + size];
-            array[i][j] = array[i + size][j];
-            array[i + size][j + size] = array[i][j + size];
-            array[i + size][j] = aux1;
-            array[i][j + size] = aux1;
+            aux1 = *(array + i * maxWidth + j);
+            aux2 = *(array + (i + size) * maxWidth + j + size);
+            *(array + i * maxWidth + j) = *(array + i * maxWidth + j + size);
+            *(array + (i + size) * maxWidth + j + size) = *(array + (i + size) * maxWidth + j);
+            *(array + i * maxWidth + j + size) = aux2;
+            *(array + (i + size) * maxWidth + j) = aux1;
         }
     }
-
 }
