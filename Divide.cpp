@@ -34,6 +34,10 @@ int main(){
 
     printf("Archivo procesado.\n");
 
+    rotate(R[0], 0, 0, 256, 256);
+    rotate(G[0], 0, 0, 256, 256);
+    rotate(B[0], 0, 0, 256, 256);    
+
     printf("Rotando imagen...\n");
 
     ptr = fopen("imgRotated.ppm", "wb");
